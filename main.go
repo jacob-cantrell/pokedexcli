@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/jacob-cantrell/pokedexcli/internal/pokeapi"
+	"github.com/jacob-cantrell/pokedexcli/internal/pokecache"
 )
 
 type cli struct {
@@ -24,16 +26,16 @@ func (c *cli) addCommand(cmd cliCommand) {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config) error
+	callback    func(string, *pokeapi.Config) error
 }
 
-func commandExit(con *pokeapi.Config) error {
+func commandExit(s string, con *pokeapi.Config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func (c *cli) commandHelp(con *pokeapi.Config) error {
+func (c *cli) commandHelp(s string, con *pokeapi.Config) error {
 	// Now you can access c.commands directly
 	// Your help logic here
 	fmt.Println("Welcome to the Pokedex!")
@@ -51,15 +53,32 @@ func CleanInput(text string) []string {
 	return wordList
 }
 
+var pokeCache *pokecache.Cache
+
 func main() {
+	pokeCache = pokecache.NewCache(5 * time.Minute)
+	pokedex := make(map[string]pokeapi.Pokemon)
+
 	cliObj := cli{
 		commands: make(map[string]cliCommand),
 	}
 	con := pokeapi.Config{
-		Next:     "",
-		Previous: "",
+		Next:      "",
+		Previous:  "",
+		PokeCache: pokeCache,
+		Pokedex:   pokedex,
 	}
 	conPtr := &con
+	cliObj.addCommand(cliCommand{
+		name:        "catch",
+		description: "Attempts to catch a pokemon!",
+		callback:    pokeapi.Catch,
+	})
+	cliObj.addCommand(cliCommand{
+		name:        "explore",
+		description: "Lists all pokemon in a given location area",
+		callback:    pokeapi.Explore,
+	})
 	cliObj.addCommand(cliCommand{
 		name:        "help",
 		description: "Displays a help message",
@@ -95,9 +114,16 @@ func main() {
 			if _, ok := commands[commandSplit[0]]; !ok {
 				fmt.Println("Unknown command")
 			} else {
-				err := commands[commandSplit[0]].callback(conPtr)
-				if err != nil {
-					fmt.Println(err)
+				if len(commandSplit) > 1 {
+					err := commands[commandSplit[0]].callback(commandSplit[1], conPtr)
+					if err != nil {
+						fmt.Println(err)
+					}
+				} else {
+					err := commands[commandSplit[0]].callback("", conPtr)
+					if err != nil {
+						fmt.Println(err)
+					}
 				}
 			}
 		}
