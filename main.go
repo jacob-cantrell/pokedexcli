@@ -85,6 +85,11 @@ func main() {
 		callback:    cliObj.commandHelp,
 	})
 	cliObj.addCommand(cliCommand{
+		name:        "inspect",
+		description: "Lists a caught pokemon's name, height, weight, base states, and types!",
+		callback:    pokeapi.Inspect,
+	})
+	cliObj.addCommand(cliCommand{
 		name:        "map",
 		description: "Shows next 20 locations",
 		callback:    pokeapi.Map,

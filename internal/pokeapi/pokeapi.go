@@ -451,6 +451,27 @@ func Catch(pokemon string, con *Config) error {
 	return nil
 }
 
+func Inspect(pokemon string, con *Config) error {
+	p, ok := con.Pokedex[pokemon]
+	if !ok {
+		fmt.Println("you have not caught that pokemon")
+		return nil
+	}
+	fmt.Printf("Name: %s\n", p.Name)
+	fmt.Printf("Height: %d\n", p.Height)
+	fmt.Printf("Weight: %d\n", p.Weight)
+	fmt.Println("Stats:")
+	for _, v := range p.Stats {
+		fmt.Printf("  -%s: %d\n", v.Stat.Name, v.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, t := range p.Types {
+		fmt.Printf("  - %s\n", t.Type.Name)
+	}
+
+	return nil
+}
+
 func Explore(location string, con *Config) error {
 	// Make sure location is a valid string
 	if location == "" {
