@@ -19,8 +19,7 @@ func main() {
 		fmt.Print("Pokedex > ")
 		if scanner.Scan() {
 			text := scanner.Text()
-			text = strings.ToLower(text)
-			commandSplit := strings.Fields(text)
+			commandSplit := CleanInput(text)
 			if len(commandSplit) == 0 {
 				continue
 			}
