@@ -47,6 +47,19 @@ func (c *cli) commandHelp(s string, con *pokeapi.Config) error {
 	return nil
 }
 
+func (c *cli) commandPokedex(s string, con *pokeapi.Config) error {
+	if len(con.Pokedex) == 0 {
+		fmt.Println("you have caught 0 pokemon!")
+	} else {
+		fmt.Println("Your Pokedex:")
+		for _, pokemon := range con.Pokedex {
+			fmt.Printf("  - %s\n", pokemon.Name)
+		}
+	}
+
+	return nil
+}
+
 func CleanInput(text string) []string {
 	s := strings.ToLower(text)
 	wordList := strings.Fields(s)
@@ -98,6 +111,11 @@ func main() {
 		name:        "mapb",
 		description: "Shows previous 20 locations",
 		callback:    pokeapi.Mapb,
+	})
+	cliObj.addCommand(cliCommand{
+		name:        "pokedex",
+		description: "Lists all caught pokemon",
+		callback:    cliObj.commandPokedex,
 	})
 	cliObj.addCommand(cliCommand{
 		name:        "exit",
